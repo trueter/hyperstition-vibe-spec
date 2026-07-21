@@ -2,13 +2,18 @@
 
 Gateway box: `192.168.1.83`, docker `femoid-gateway` (go2rtc).
 
+## Cameras
+
+- **Sentinel** — outdoor
+- **Sparkle** — dancefloor
+
 ## RTSP restream (VLC: Media → Open Network Stream → paste URI)
 
 ```
 rtsp://192.168.1.83:8554/sentinel_sub
 rtsp://192.168.1.83:8554/sparkle_sub
 rtsp://192.168.1.83:8554/sentinel_subweb   # NVENC re-encode, smoother — recommended
-rtsp://192.168.1.83:8554/sparkle_subweb
+rtsp://192.168.1.83:8554/sparkle_subweb    # NVENC re-encode, smoother — recommended
 ```
 
 ### Format
