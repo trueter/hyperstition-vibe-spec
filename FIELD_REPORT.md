@@ -27,7 +27,7 @@ below is measured from logs the unit wrote to disk across 17 recorded sessions b
 | Recorded sessions | 17 (10 with vibe logging) |
 | Runtime logged | 49.2 hours |
 | Vibe samples at 1 Hz | 109,344 |
-| Snapshots written | 22,801 (21 GB) |
+| Snapshots written | 22,801 files / 19,708 distinct captures (21 GB) |
 | Subject IDs tracked | 20,567 |
 | Logged events | 31,013 |
 | Longest unattended run | 21 h 43 min, no crash |
@@ -239,8 +239,8 @@ snapshots and 94 subject IDs during setup.
 | 25 Jul 19:32 | 531.5 | 30,802 | 7.1 | 100 | 0.70 | 0.00 | 60.4 | 8,879 | 822 | 77 |
 
 Columns: `Min` is session length in minutes, `>=50` / `>=82` / `Dead` are the share of
-samples above 50, above 82 and below 5 respectively, `Faces` counts snapshots carrying
-the clean-face marker.
+samples above 50, above 82 and below 5 respectively. `Snaps` and `Faces` count **files**,
+which overstates distinct captures — see Appendix C.
 
 Cross-day archive coverage, written by the retention job:
 
@@ -252,10 +252,10 @@ Cross-day archive coverage, written by the retention job:
 
 # Appendix B — event census
 
-Counts are of **log events**, which is not the same as derived counts elsewhere in this
-report. `CLEAN_FACE` fired 704 times as an event, while 3,019 saved snapshots carry the
-clean-face marker in their filename; the event is emitted once per qualifying detection
-rather than once per written frame.
+Counts are of **log events**, which is not the same as the file counts used elsewhere in
+this report. `CLEAN_FACE` fired 704 times as an event, while 3,019 files carry the
+clean-face marker — the event is emitted once per qualifying detection rather than once
+per written file, and each detection can write two files (see Appendix C).
 
 | Event | Count | Meaning |
 | --- | ---: | --- |
@@ -276,8 +276,25 @@ rather than once per written frame.
 | `FEED_ERROR` | 6 | Feed gave up after both transports |
 | `PEAK_MODE` | **0** | Crowd-driven escalation event |
 
-# Appendix C — storage
+# Appendix C — storage and the double-write
 
-Capture ran at 463 snapshots per hour, averaging roughly 0.9 MB each — about 9 GB per 24
-hours of runtime. The archive stands at 21 GB. Since 86.8% of snapshots carry no clean
-face, face-gated retention is the obvious reduction.
+Capture ran at 463 files per hour, averaging roughly 0.9 MB each — about 9 GB per 24
+hours of runtime. The archive stands at 21 GB.
+
+The raw file count overstates what was actually captured. When a detection is annotated,
+the unit writes both a marked and an unmarked copy of the same frame, so 3,093 captures
+occupy two files each:
+
+| | Files | Distinct captures |
+| --- | ---: | ---: |
+| All snapshots | 22,801 | 19,708 |
+| Carrying the clean-face marker | 3,019 | 1,512 |
+| Share with a clean face | 13.2% | **7.7%** |
+
+Of the 1,512 distinct face captures, 1,507 exist in both marked and unmarked form and 5
+are unmarked only. The 7.7% figure is the honest one: **fewer than one frame in twelve
+contains a usable face**, and the apparent 13.2% yield is an artefact of counting files.
+
+Two reductions follow. Deduplicating the paired writes removes 3,093 files at no
+information cost, and face-gated retention on top of that would discard the 92.3% of
+distinct captures that contain nothing usable.
