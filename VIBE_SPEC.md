@@ -11,6 +11,10 @@
 >
 > A field-by-field [correspondence table](#correspondence-between-the-two-engines)
 > maps the two vocabularies so a single downstream UI can consume either one.
+>
+> **See also:** [`FIELD_REPORT.md`](FIELD_REPORT.md)
+> ([PDF](FIELD_REPORT.pdf)) measures Part II against 49 hours of exhibition
+> telemetry and lists six proposed amendments to the constants documented here.
 
 ---
 
